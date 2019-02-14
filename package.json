@@ -1,0 +1,23 @@
+{
+  "name": "ts-koa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/app.js",
+  "scripts": {
+    "start": "tsc && cross-env NODE_ENV=development node ./dist/app.js",
+    "dev": "node ./node_modules/nodemon/bin/nodemon.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/koa": "^2.0.48",
+    "@types/koa-router": "^7.0.39",
+    "koa": "^2.7.0",
+    "koa-router": "^7.4.0",
+    "nodemon": "^1.18.10"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.0"
+  }
+}
