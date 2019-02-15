@@ -5,6 +5,33 @@ import * as Router from 'koa-router';
 export class Loader {
   router: Router = new Router;
   controller: any = {};
+  app: any;
+  constructor(app: any) {
+      this.app = app;
+  }
+
+  loadService() {
+    const service = fs.readdirSync(__dirname + '/service');
+    const that = this;
+    Object.defineProperty(this.app.context, 'service', {
+      get() {
+        if (!(<any>this)['cache']) {
+          (<any>this)['cache'] = {};
+        }
+        const loaded = (<any>this)['cache'];
+        if (!loaded['service']) {
+            loaded['service'] = {};
+            service.forEach(d => {
+              const name = d.split('.')[0];
+              const mod = require(__dirname + '/service/' + d);
+              loaded['service'][name] = new mod(this, that.app);
+            });
+            return loaded.service;
+        }
+        return loaded.service;
+      }
+    });
+  }
 
   loadController() {
     const dirs = fs.readdirSync(__dirname + '/controller');
@@ -35,6 +62,9 @@ export class Loader {
 
   loadRouter() {
     this.loadController();
+    this.loadService();
+    this.loadConfig();
+
     const mod = require(__dirname + '/router.js');
     const routers = mod(this.controller);
     Object.keys(routers).forEach(key => {
@@ -42,10 +72,23 @@ export class Loader {
       (<any>this.router)[method](path, async (ctx: BaseContext) => {
         const _class = routers[key].type;
         const handler = routers[key].methodName;
-        const instance = new _class(ctx);
+        const instance = new _class(ctx, this.app);
         instance[handler]();
       })
     })
     return this.router.routes();
+  }
+
+  loadConfig() {
+    const configDef = __dirname + '/config/config.default.js';
+    const configEnv = __dirname + (process.env.NODE_ENV === 'production' ? '/config/config.pro.js' : '/config/config.dev.js');
+    const conf = require(configEnv);
+    const confDef = require(configDef);
+    const merge = Object.assign({}, conf, confDef);
+    Object.defineProperty(this.app, 'config', {
+      get: () => {
+        return merge
+      }
+    })
   }
 }

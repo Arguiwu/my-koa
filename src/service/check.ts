@@ -1,7 +1,7 @@
-import { BaseContext } from 'koa';
+import { BaseContext } from "koa";
 import * as Koa from "koa";
 
-export class Controller {
+class Service {
   ctx: BaseContext;
   app: Koa;
   constructor(ctx: BaseContext, app: Koa) {
@@ -9,3 +9,10 @@ export class Controller {
     this.app = app;
   }
 }
+class check extends Service {
+  index() {
+    return 2 + 3
+  }
+}
+
+module.exports = check;
